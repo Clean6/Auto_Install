@@ -1,0 +1,43 @@
+{
+    "winget": {
+        "packages": [
+            "Mozilla.Firefox",
+            "VideoLAN.VLC",
+            "Discord.Discord",
+            "Spotify.Spotify",
+            "7zip.7zip",
+            "RaspberryPiFoundation.RaspberryPiImager",
+            "Valve.Steam",
+            "Mojang.MinecraftLauncher",
+            "Microsoft.PowerToys",
+            "Git.Git",
+            "WiresharkFoundation.Wireshark",
+            "AutoHotkey.AutoHotkey",
+            "Logitech.GHUB",
+            "Elgato.StreamDeck",
+            "WhatsApp.WhatsApp",
+            "NVIDIA.GeForceExperience",
+            "Oracle.JDK.17",
+            "Python.Python.3.11",
+            "Microsoft.DotNet.SDK.7"
+        ]
+    },
+    "custom_installers": {
+        "bambu_studio": {
+            "url": "https://github.com/bambulab/BambuStudio/releases/latest/download/BambuStudio_win_X64.exe",
+            "silent_args": "/S"
+        },
+        "nvidia_cuda": {
+            "url": "https://developer.download.nvidia.com/compute/cuda/12.3.2/local_installers/cuda_12.3.2_546.12_windows.exe",
+            "silent_args": "-s"
+        },
+        "bluebeam": {
+            "installer_path": "\\\\network-share\\BluebeamRevu\\Setup.exe",
+            "silent_args": "/qn"
+        },
+        "office": {
+            "setup_path": ".\\Office\\setup.exe",
+            "config_path": ".\\Office\\Online-MS_Office-Installation-CONFIG.xml"
+        }
+    }
+}

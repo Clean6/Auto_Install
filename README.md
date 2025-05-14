@@ -7,3 +7,6 @@ To run mac os:
 -- Run Script --
 
 	./Homebrew_Package_Installer.sh
+
+
+To Uninstall all Homebrew items run ```brew list --formula | xargs brew uninstall --force``` and for casks run ```brew list --cask | xargs brew uninstall --force```

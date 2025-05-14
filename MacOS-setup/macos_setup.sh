@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source logging utilities
+source "$(dirname "${BASH_SOURCE[0]}")/logging_utils.sh"
+
 # Colors for styling
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -339,8 +342,21 @@ else
     echo -e "\r${RED}✗${NC} Failed to clone BlackboardSync  "
 fi
 
-# Create installation flag file
-touch "$INSTALL_FLAG"
-echo "$(date)" > "$INSTALL_FLAG"
+# Create installation flag file with timestamp and summary
+{
+    echo "Installation completed on $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "Installation logs directory: $LOGS_DIR"
+    
+    # Add summary of installed items
+    echo -e "\nInstalled Packages Summary:"
+    for type in brew cask mas github; do
+        if [[ -f "$LOGS_DIR/${type}_installed.log" ]]; then
+            echo -e "\n${type^} packages:"
+            cat "$LOGS_DIR/${type}_installed.log"
+        fi
+    done
+} > "$INSTALL_FLAG"
 
 echo -e "\n${GREEN}✨ Installation complete! ✨${NC}"
+echo -e "Installation logs can be found in: $LOGS_DIR"
+echo -e "A summary has been saved to: $INSTALL_FLAG"

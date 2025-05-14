@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source logging utilities
+source "$(dirname "${BASH_SOURCE[0]}")/logging_utils.sh"
+
 # Colors for styling
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -113,16 +116,26 @@ cask_packages=(
 install_package() {
     local package=$1
     local is_cask=$2
+    local package_type="brew"
+    [[ "$is_cask" == "true" ]] && package_type="cask"
+
+    # Check if package was previously installed successfully
+    if check_previous_install "$package_type" "$package"; then
+        echo -e "${GREEN}✓${NC} ${package} was previously installed successfully"
+        return 0
+    fi
 
     if [[ "$is_cask" == "true" ]]; then
         if brew list --cask "$package" &>/dev/null; then
             echo -e "${GREEN}✓${NC} ${package} is already installed"
+            log_success "$package_type" "$package"
             return 0
         fi
         cmd="brew install --cask"
     else
         if brew list "$package" &>/dev/null; then
             echo -e "${GREEN}✓${NC} ${package} is already installed"
+            log_success "$package_type" "$package"
             return 0
         fi
         cmd="brew install"
@@ -135,6 +148,7 @@ install_package() {
     wait $pid
     if [ $? -eq 0 ]; then
         echo -e "\r${GREEN}✓${NC} Successfully installed ${package}  "
+        log_success "$package_type" "$package"
     else
         echo -e "\r${RED}✗${NC} Failed to install ${package}  "
     fi

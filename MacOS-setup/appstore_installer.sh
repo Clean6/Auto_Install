@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source logging utilities
+source "$(dirname "${BASH_SOURCE[0]}")/logging_utils.sh"
+
 # Colors for styling
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -30,9 +33,23 @@ install_mas_apps() {
     for package in "${mas_packages[@]}"; do
         id=${package%% *}
         name=${package#* }
+
+        # Check if app was previously installed successfully
+        if check_previous_install "mas" "$id"; then
+            echo -e "${GREEN}✓${NC} ${name} was previously installed successfully"
+            continue
+        fi
+
         echo -n "Installing ${name}..."
+        if mas list | grep -q "^$id"; then
+            echo -e "\r${GREEN}✓${NC} ${name} is already installed  "
+            log_success "mas" "$id"
+            continue
+        fi
+
         if mas install "$id" &>/dev/null; then
             echo -e "\r${GREEN}✓${NC} Successfully installed ${name}  "
+            log_success "mas" "$id"
             
             # Accept Xcode license if this was Xcode
             if [ "$id" = "497799835" ] && command -v xcodebuild >/dev/null 2>&1; then

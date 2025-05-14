@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source logging utilities
+source "$(dirname "${BASH_SOURCE[0]}")/logging_utils.sh"
+
 # Colors for styling
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -24,7 +27,20 @@ spinner() {
 # Build and install Ghidra
 install_ghidra() {
     echo -e "\n${BOLD}Building Ghidra from source...${NC}"
-    
+
+    # Check if Ghidra was previously installed successfully
+    if check_previous_install "github" "ghidra"; then
+        echo -e "${GREEN}✓${NC} Ghidra was previously installed successfully"
+        return 0
+    fi
+
+    # Check if Ghidra is already installed
+    if [ -d "/Applications/Ghidra" ]; then
+        echo -e "${GREEN}✓${NC} Ghidra is already installed"
+        log_success "github" "ghidra"
+        return 0
+    fi
+
     # Verify Java installation
     if ! java -version &>/dev/null; then
         echo -e "${RED}✗${NC} Java is not installed. Please install Java first."
@@ -75,6 +91,7 @@ install_ghidra() {
                 sudo mkdir -p /Applications
                 if sudo mv build/dist/ghidra_* /Applications/Ghidra &>/dev/null; then
                     echo -e "\r${GREEN}✓${NC} Successfully installed Ghidra  "
+                    log_success "github" "ghidra"
                 else
                     echo -e "\r${RED}✗${NC} Failed to install Ghidra  "
                     return 1
@@ -101,6 +118,20 @@ install_ghidra() {
 # Install BlackboardSync
 install_blackboardsync() {
     echo -e "\n${BOLD}Installing BlackboardSync...${NC}"
+
+    # Check if BlackboardSync was previously installed successfully
+    if check_previous_install "github" "blackboardsync"; then
+        echo -e "${GREEN}✓${NC} BlackboardSync was previously installed successfully"
+        return 0
+    fi
+
+    # Check if BlackboardSync is already installed via pip
+    if pip3 show blackboardsync &>/dev/null; then
+        echo -e "${GREEN}✓${NC} BlackboardSync is already installed"
+        log_success "github" "blackboardsync"
+        return 0
+    fi
+
     echo -n "Cloning BlackboardSync repository..."
     git clone https://github.com/sanjacob/BlackboardSync /tmp/BlackboardSync &>/dev/null &
     pid=$!
@@ -117,6 +148,7 @@ install_blackboardsync() {
         wait $pid
         if [ $? -eq 0 ]; then
             echo -e "\r${GREEN}✓${NC} Successfully installed BlackboardSync  "
+            log_success "github" "blackboardsync"
             cd - >/dev/null
             rm -rf /tmp/BlackboardSync
             return 0

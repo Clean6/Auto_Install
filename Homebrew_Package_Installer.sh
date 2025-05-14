@@ -55,7 +55,8 @@ brew_packages=(
     "git"
     "tmux"
     "htop"
-    "python3"
+    "python3"  # Specify Python version explicitly
+    "mas"  # Mac App Store CLI
     # CLI Tools
     "trash"
     "tree"
@@ -92,7 +93,6 @@ cask_packages=(
     # Cloud & Internet
     "firefox"
     "discord"
-    "steam"
     # Productivity
     "mactex"
     # Audio/Video/Graphics
@@ -158,6 +158,45 @@ done
 echo -e "\n${BOLD}Installing cask packages...${NC}"
 for package in "${cask_packages[@]}"; do
     install_package "$package" "true"
+done
+
+# Install Mac App Store applications
+echo -e "\n${BOLD}Installing Mac App Store applications...${NC}"
+
+# Check and wait for Mac App Store sign in
+while ! mas account >/dev/null; do
+    echo -e "${RED}⚠️  You are not signed into the Mac App Store${NC}"
+    echo -e "Please sign in to the Mac App Store application and press ENTER to continue..."
+    read -r
+    echo -e "Checking sign in status..."
+    sleep 2  # Give some time for the sign in to register
+done
+
+echo -e "${GREEN}✓${NC} Successfully signed into Mac App Store"
+
+# Array of Mac App Store apps with their IDs
+mas_packages=(
+    "497799835 Xcode"
+    "462058435 Microsoft Excel"
+    "462054704 Microsoft Word"
+    "462062816 Microsoft PowerPoint"
+    "985367838 Microsoft Outlook"
+)
+
+# Install each Mac App Store package
+for package in "${mas_packages[@]}"; do
+    id=${package%% *}
+    name=${package#* }
+    echo -n "Installing ${name}..."
+    mas install "$id" &>/dev/null &
+    pid=$!
+    spinner $pid
+    wait $pid
+    if [ $? -eq 0 ]; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed ${name}  "
+    else
+        echo -e "\r${RED}✗${NC} Failed to install ${name}  "
+    fi
 done
 
 # Add tap for fonts

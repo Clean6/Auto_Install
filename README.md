@@ -1,11 +1,9 @@
 To run mac os:
 
--- Install Homebrew --
-
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
 -- Run Script --
 
+	chmod +x Homebrew_Package_Installer.sh
+ 
 	./Homebrew_Package_Installer.sh
 
 

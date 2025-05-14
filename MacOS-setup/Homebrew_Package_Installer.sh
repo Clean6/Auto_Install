@@ -156,12 +156,25 @@ done
 # Build Ghidra from source
 echo -e "\n${BOLD}Building Ghidra from source...${NC}"
 
+# Verify Java installation
+if ! command -v java &>/dev/null; then
+    echo -e "${RED}✗${NC} Java not found. Installing OpenJDK..."
+    brew install openjdk
+    sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+fi
+
+# Verify Gradle installation
+if ! command -v gradle &>/dev/null; then
+    echo -e "${RED}✗${NC} Gradle not found. Installing Gradle..."
+    brew install gradle
+fi
+
 # Create a clean temporary directory
 GHIDRA_TMP_DIR=$(mktemp -d)
 echo -n "Cloning Ghidra repository..."
 
 # Clone with progress in background
-git clone https://github.com/NationalSecurityAgency/ghidra.git "$GHIDRA_TMP_DIR" &>/dev/null &
+git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra.git "$GHIDRA_TMP_DIR" &>/dev/null &
 pid=$!
 spinner $pid
 wait $pid
@@ -173,10 +186,17 @@ if [ $? -eq 0 ]; then
     # Change to Ghidra directory
     cd "$GHIDRA_TMP_DIR" || exit 1
     
+    # Export JAVA_HOME for Gradle
+    export JAVA_HOME=$(brew --prefix)/opt/openjdk/libexec/openjdk.jdk/Contents/Home
+    
     # First fetch dependencies (not in background to ensure completion)
-    if gradle --init-script gradle/support/fetchDependencies.gradle init &>/dev/null; then
+    echo -n "Fetching dependencies..."
+    if ./gradlew --init-script gradle/support/fetchDependencies.gradle init; then
+        echo -e "\r${GREEN}✓${NC} Dependencies fetched successfully"
+        
         # Then build Ghidra (not in background to ensure completion)
-        if gradle buildGhidra &>/dev/null; then
+        echo -n "Building Ghidra..."
+        if ./gradlew buildGhidra; then
             echo -e "\r${GREEN}✓${NC} Successfully built Ghidra  "
             
             echo -n "Installing Ghidra..."
@@ -190,10 +210,10 @@ if [ $? -eq 0 ]; then
                 echo -e "\r${RED}✗${NC} Failed to install Ghidra  "
             fi
         else
-            echo -e "\r${RED}✗${NC} Failed to build Ghidra. Try building manually with: cd $GHIDRA_TMP_DIR && gradle buildGhidra"
+            echo -e "\r${RED}✗${NC} Failed to build Ghidra. Try building manually with: cd $GHIDRA_TMP_DIR && ./gradlew buildGhidra"
         fi
     else
-        echo -e "\r${RED}✗${NC} Failed to initialize Ghidra build. Check if gradle is properly installed."
+        echo -e "\r${RED}✗${NC} Failed to initialize Ghidra build. Check Java installation and internet connection."
     fi
     
     # Return to original directory and cleanup
@@ -207,17 +227,16 @@ fi
 echo -e "\n${BOLD}Installing Python setuptools...${NC}"
 echo -n "Installing setuptools..."
 
-# Use python3 -m pip to ensure we're using the right pip
+# Use python3 -m pip with user installation to avoid permission issues
 if command -v python3 >/dev/null 2>&1; then
     # Run pip install without background process to ensure completion
-    if python3 -m pip install --upgrade setuptools &>/dev/null; then
+    if python3 -m pip install --user --upgrade setuptools &>/dev/null; then
         echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
     else
-        echo -e "\r${RED}✗${NC} Failed to install setuptools. Try running: python3 -m pip install --upgrade setuptools"
+        echo -e "\r${RED}✗${NC} Failed to install setuptools. Try running: python3 -m pip install --user --upgrade setuptools"
     fi
 else
     echo -e "\r${RED}✗${NC} Python3 not found. Please ensure Python3 is installed."
-fi
 fi
 
 # Install cask packages

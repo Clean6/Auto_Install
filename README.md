@@ -1,11 +1,108 @@
-To run mac os:
+# Auto_Install - Multi-Platform Setup Automation
 
--- Make file executable --
+This repository contains setup automation scripts for both macOS and Windows environments. It helps you quickly set up a new machine with all the necessary development tools, applications, and configurations.
 
-	chmod +x Homebrew_Package_Installer.sh
- -- Run Script --
- 
-	./Homebrew_Package_Installer.sh
+## Features
 
+- **macOS Setup**:
+  - Automated Homebrew installation and package management
+  - Development tools (Python, Git, Node.js, etc.)
+  - Common applications via Homebrew Cask
+  - Mac App Store applications via `mas`
+  - Custom builds (Ghidra from source)
+  - Python package installation
 
-To Uninstall all Homebrew items run ```brew list --formula | xargs brew uninstall --force``` and for casks run ```brew list --cask | xargs brew uninstall --force```
+- **Windows Setup**:
+  - PowerShell-based automation
+  - Microsoft Office installation
+  - Common development tools
+  - System configuration
+
+## Quick Start
+
+### macOS Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Clean6/Auto_Install.git
+   cd Auto_Install/MacOS-setup
+   ```
+
+2. Make the script executable:
+   ```bash
+   chmod +x Homebrew_Package_Installer.sh
+   ```
+
+3. Run the script:
+   ```bash
+   ./Homebrew_Package_Installer.sh
+   ```
+
+### Windows Setup
+
+1. Clone the repository
+2. Open PowerShell as Administrator
+3. Navigate to the windows-setup directory
+4. Run:
+   ```powershell
+   Set-ExecutionPolicy Bypass -Scope Process -Force
+   .\src\main.ps1
+   ```
+
+## Customization
+
+### macOS
+- Edit `MacOS-setup/Homebrew_Package_Installer.sh` to modify:
+  - Homebrew packages (`brew_packages` array)
+  - Cask applications (`cask_packages` array)
+  - Mac App Store applications (`mas_packages` array)
+
+### Windows
+- Edit `windows-setup/src/config/packages.json` to modify the Windows package list
+
+## Uninstallation
+
+### macOS
+To remove all Homebrew packages:
+```bash
+# Remove formulae
+brew list --formula | xargs brew uninstall --force
+
+# Remove casks
+brew list --cask | xargs brew uninstall --force
+
+# Clean up Homebrew
+brew cleanup
+```
+
+### Windows
+Run the uninstallation script:
+```powershell
+.\windows-setup\scripts\uninstall.ps1
+```
+
+## Requirements
+
+### macOS
+- macOS 10.15 or later
+- Administrative privileges
+- Internet connection
+- Apple ID (for Mac App Store installations)
+
+### Windows
+- Windows 10 or later
+- Administrative privileges
+- Internet connection
+- PowerShell 5.1 or later
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -1,13 +1,37 @@
 #!/bin/bash
 
-# Colors and symbols for styling
+# Colors for styling
 BOLD='\033[1m'
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Spinner array
-spinner=( "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏" )
+# Check and install Homebrew
+install_homebrew() {
+    echo -e "${BOLD}Checking for Homebrew installation...${NC}"
+    if ! command -v brew &> /dev/null; then
+        echo -e "${BOLD}Homebrew is not installed. Installing now...${NC}"
+        
+        # Install Homebrew
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        
+        # Add Homebrew to PATH for Apple Silicon Macs
+        if [[ $(uname -m) == 'arm64' ]]; then
+            echo -e "${BOLD}Configuring Homebrew for Apple Silicon...${NC}"
+            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+
+        if command -v brew &> /dev/null; then
+            echo -e "${GREEN}✓${NC} Homebrew installed successfully!"
+        else
+            echo -e "${RED}✗${NC} Failed to install Homebrew. Please install it manually."
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✓${NC} Homebrew is already installed"
+    fi
+}
 
 # Arrays of packages to install
 brew_packages=(
@@ -60,86 +84,56 @@ cask_packages=(
     "spotify"
 )
 
-# Enhanced progress bar function
-show_progress() {
-    local duration=$1
-    local prefix=$2
-    local width=30
-    local progress=0
-    local bar_char="━"
-    local empty_char="─"
-    local spin_idx=0
+# Function to install a package
+install_package() {
+    local package=$1
+    local is_cask=$2
 
-    printf "\n"
-    while [ $progress -le 100 ]; do
-        local count=$(($width * $progress / 100))
-        local spaces=$(($width - count))
-        
-        # Create the filled and empty portions of the bar
-        local fill=""
-        local empty=""
-        for ((i=0; i<count; i++)); do
-            fill="${fill}${bar_char}"
-        done
-        for ((i=0; i<spaces; i++)); do
-            empty="${empty}${empty_char}"
-        done
+    if [[ "$is_cask" == "true" ]]; then
+        if brew list --cask "$package" &>/dev/null; then
+            echo -e "${GREEN}✓${NC} ${package} is already installed"
+            return 0
+        fi
+        cmd="brew install --cask"
+    else
+        if brew list "$package" &>/dev/null; then
+            echo -e "${GREEN}✓${NC} ${package} is already installed"
+            return 0
+        fi
+        cmd="brew install"
+    fi
 
-        # Print the progress bar with spinner
-        printf "\r${BLUE}${spinner[$spin_idx]}${NC} ${prefix} ${BOLD}[${GREEN}${fill}${NC}${BOLD}${empty}]${NC} ${BOLD}%d%%${NC}" $progress
-
-        progress=$((progress + 2))
-        spin_idx=$(( (spin_idx + 1) % 10 ))
-        sleep $duration
-    done
-    printf "\n"
+    echo "Installing ${package}..."
+    if $cmd "$package" &>/dev/null; then
+        echo -e "${GREEN}✓${NC} Successfully installed ${package}"
+    else
+        echo -e "${RED}✗${NC} Failed to install ${package}"
+    fi
 }
 
-# Function to update and upgrade Homebrew
-update_homebrew() {
-    echo "Updating Homebrew..."
-    brew update >/dev/null 2>&1 & show_progress 0.1 "Updating Homebrew"
-    echo "Upgrading existing packages..."
-    brew upgrade >/dev/null 2>&1 & show_progress 0.1 "Upgrading packages"
-    echo "Cleaning up..."
-    brew cleanup >/dev/null 2>&1 & show_progress 0.1 "Cleaning up"
-}
+# Install Homebrew if needed
+install_homebrew
 
-# Check if Homebrew is installed
-if ! command -v brew &> /dev/null; then
-    echo "Homebrew is not installed. Installing now..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-
-# Update and upgrade Homebrew packages
-update_homebrew
+# Update Homebrew
+echo -e "\n${BOLD}Updating Homebrew...${NC}"
+brew update &>/dev/null
+brew upgrade &>/dev/null
+brew cleanup &>/dev/null
 
 # Install brew packages
-echo "Installing brew packages..."
+echo -e "\n${BOLD}Installing brew packages...${NC}"
 for package in "${brew_packages[@]}"; do
-    if brew list "$package" &>/dev/null; then
-        echo "✓ ${package} is already installed"
-    else
-        echo "Installing ${package}..."
-        brew install "$package" >/dev/null 2>&1 & show_progress 0.05 "Installing ${package}"
-        echo "✓ ${package} installed successfully"
-    fi
+    install_package "$package" "false"
 done
 
 # Install cask packages
-echo "Installing cask packages..."
+echo -e "\n${BOLD}Installing cask packages...${NC}"
 for package in "${cask_packages[@]}"; do
-    if brew list --cask "$package" &>/dev/null; then
-        echo "✓ ${package} is already installed"
-    else
-        echo "Installing ${package}..."
-        brew install --cask "$package" >/dev/null 2>&1 & show_progress 0.1 "Installing ${package}"
-        echo "✓ ${package} installed successfully"
-    fi
+    install_package "$package" "true"
 done
 
 # Add tap for fonts
-echo "Adding font support..."
-brew tap homebrew/cask-fonts >/dev/null 2>&1 & show_progress 0.05
+echo -e "\n${BOLD}Adding font support...${NC}"
+brew tap homebrew/cask-fonts &>/dev/null
 
-echo "✨ Installation complete! ✨"
+echo -e "\n${GREEN}✨ Installation complete! ✨${NC}"

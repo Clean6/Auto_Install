@@ -166,32 +166,45 @@ done
 # Build Ghidra from source
 echo -e "\n${BOLD}Building Ghidra from source...${NC}"
 
-# Verify Java installation
-if ! command -v java &>/dev/null; then
-    echo -e "${RED}✗${NC} Java not found. Installing OpenJDK..."
-    brew install openjdk
-    sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
-fi
+# Install required dependencies
+REQUIRED_DEPS=("openjdk" "gradle" "git" "unzip")
+echo "Installing required dependencies..."
+for dep in "${REQUIRED_DEPS[@]}"; do
+    echo -n "Checking ${dep}..."
+    if ! brew list "$dep" &>/dev/null; then
+        echo -e "\r${BOLD}Installing ${dep}...${NC}"
+        if brew install "$dep" &>/dev/null; then
+            echo -e "\r${GREEN}✓${NC} Successfully installed ${dep}  "
+        else
+            echo -e "\r${RED}✗${NC} Failed to install ${dep}  "
+            exit 1
+        fi
+    else
+        echo -e "\r${GREEN}✓${NC} ${dep} is already installed  "
+    fi
+done
 
-# Verify Gradle installation
-if ! command -v gradle &>/dev/null; then
-    echo -e "${RED}✗${NC} Gradle not found. Installing Gradle..."
-    brew install gradle
-fi
+# Set up Java environment
+echo -n "Setting up Java environment..."
+sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+export JAVA_HOME=$(brew --prefix)/opt/openjdk/libexec/openjdk.jdk/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Verify Java installation
+if ! java -version &>/dev/null; then
+    echo -e "\r${RED}✗${NC} Java setup failed. Please install Java manually."
+    exit 1
+else
+    echo -e "\r${GREEN}✓${NC} Java environment set up successfully  "
 
 # Create a clean temporary directory
 GHIDRA_TMP_DIR=$(mktemp -d)
 echo -n "Cloning Ghidra repository..."
 
-# Clone with progress in background
-git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra.git "$GHIDRA_TMP_DIR" &>/dev/null &
-pid=$!
-spinner $pid
-wait $pid
-
-if [ $? -eq 0 ]; then
+# Clone with progress (not in background for reliability)
+echo -n "Cloning Ghidra repository..."
+if git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra.git "$GHIDRA_TMP_DIR" &>/dev/null; then
     echo -e "\r${GREEN}✓${NC} Successfully cloned Ghidra repository  "
-    echo -n "Building Ghidra (this may take a while)..."
     
     # Change to Ghidra directory
     cd "$GHIDRA_TMP_DIR" || exit 1
@@ -199,13 +212,16 @@ if [ $? -eq 0 ]; then
     # Export JAVA_HOME for Gradle
     export JAVA_HOME=$(brew --prefix)/opt/openjdk/libexec/openjdk.jdk/Contents/Home
     
-    # First fetch dependencies (not in background to ensure completion)
-    echo -n "Fetching dependencies..."
-    if ./gradlew --init-script gradle/support/fetchDependencies.gradle init; then
+    # Set Gradle options for better performance
+    export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true"
+    
+    # First fetch dependencies
+    echo -n "Fetching dependencies (this may take a while)..."
+    if ./gradlew --console=plain --init-script gradle/support/fetchDependencies.gradle init &>/dev/null; then
         echo -e "\r${GREEN}✓${NC} Dependencies fetched successfully"
         
-        # Then build Ghidra (not in background to ensure completion)
-        echo -n "Building Ghidra..."
+        # Then build Ghidra
+        echo -n "Building Ghidra (this may take several minutes)..."
         if ./gradlew buildGhidra; then
             echo -e "\r${GREEN}✓${NC} Successfully built Ghidra  "
             
@@ -236,26 +252,37 @@ fi
 # Install Python tools
 echo -e "\n${BOLD}Installing Python tools...${NC}"
 
-# Check for Python3 installation
-if command -v python3 >/dev/null 2>&1; then
-    # First ensure pip is up to date
-    echo -n "Upgrading pip..."
-    if python3 -m pip install --upgrade pip &>/dev/null; then
-        echo -e "\r${GREEN}✓${NC} Successfully upgraded pip  "
-        
-        # Then install setuptools
-        echo -n "Installing setuptools..."
-        if python3 -m pip install --user --upgrade setuptools &>/dev/null; then
-            echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
-        else
-            echo -e "\r${RED}✗${NC} Failed to install setuptools. Try running: python3 -m pip install --user --upgrade setuptools"
-        fi
+# Check for Python3 installation and install if needed
+if ! command -v python3 >/dev/null 2>&1; then
+    echo -n "Installing Python3..."
+    brew install python3
+    if [ $? -eq 0 ]; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed Python3  "
     else
-        echo -e "\r${RED}✗${NC} Failed to upgrade pip. Try running: python3 -m pip install --upgrade pip"
+        echo -e "\r${RED}✗${NC} Failed to install Python3"
+        exit 1
+    fi
+fi
+
+# Ensure pip is installed and up to date
+echo -n "Setting up pip..."
+curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py &>/dev/null
+if python3 /tmp/get-pip.py --user &>/dev/null; then
+    echo -e "\r${GREEN}✓${NC} Successfully set up pip  "
+    
+    # Then install setuptools
+    echo -n "Installing setuptools..."
+    if python3 -m pip install --user wheel setuptools &>/dev/null; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
+    else
+        echo -e "\r${RED}✗${NC} Failed to install setuptools"
     fi
 else
-    echo -e "\r${RED}✗${NC} Python3 not found. Please ensure Python3 is installed."
+    echo -e "\r${RED}✗${NC} Failed to set up pip"
 fi
+
+# Clean up
+rm -f /tmp/get-pip.py
 
 # Install cask packages
 echo -e "\n${BOLD}Installing cask packages...${NC}"

@@ -229,54 +229,34 @@ done
 # Install Mac App Store applications
 echo -e "\n${BOLD}Installing Mac App Store applications...${NC}"
 
-# Test if mas-cli is working properly
-if ! mas account >/dev/null 2>&1; then
-    echo -e "${RED}⚠️  Mac App Store CLI (mas) is not working properly${NC}"
-    echo -e "This is a known issue with mas-cli on newer macOS versions."
-    echo -e "\nPlease install the following applications manually from the Mac App Store:"
-    echo -e "- Xcode"
-    echo -e "- Microsoft Excel"
-    echo -e "- Microsoft Word"
-    echo -e "- Microsoft PowerPoint"
-    echo -e "- Microsoft Outlook"
-    echo -e "\nAfter installing Xcode, run: sudo xcodebuild -license accept"
-    echo -e "\nPress ENTER to continue with the rest of the installation..."
-    read -r
-else
-    # Array of Mac App Store apps with their IDs
-    mas_packages=(
-        "497799835 Xcode"
-        "462058435 Microsoft Excel"
-        "462054704 Microsoft Word"
-        "462062816 Microsoft PowerPoint"
-        "985367838 Microsoft Outlook"
-    )
+# Array of Mac App Store apps with their IDs
+mas_packages=(
+    "497799835 Xcode"
+    "462058435 Microsoft Excel"
+    "462054704 Microsoft Word"
+    "462062816 Microsoft PowerPoint"
+    "985367838 Microsoft Outlook"
+)
 
-    # Install each Mac App Store package
-    for package in "${mas_packages[@]}"; do
-        id=${package%% *}
-        name=${package#* }
-        echo -n "Installing ${name}..."
-        if mas install "$id" &>/dev/null & then
-            pid=$!
-            spinner $pid
-            wait $pid
-            if [ $? -eq 0 ]; then
-                echo -e "\r${GREEN}✓${NC} Successfully installed ${name}  "
-            else
-                echo -e "\r${RED}✗${NC} Failed to install ${name}  "
+# Install each Mac App Store package
+for package in "${mas_packages[@]}"; do
+    id=${package%% *}
+    name=${package#* }
+    echo -n "Installing ${name}..."
+    if mas install "$id" &>/dev/null; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed ${name}  "
+        
+        # Accept Xcode license if this was Xcode
+        if [ "$id" = "497799835" ] && command -v xcodebuild >/dev/null 2>&1; then
+            echo -n "Accepting Xcode license..."
+            if sudo xcodebuild -license accept &>/dev/null; then
+                echo -e "\r${GREEN}✓${NC} Xcode license accepted  "
             fi
-        else
-            echo -e "\r${RED}✗${NC} Failed to install ${name}. Please install it manually from the Mac App Store.  "
         fi
-    done
-
-    # Accept Xcode license if Xcode was installed
-    if command -v xcodebuild >/dev/null 2>&1; then
-        echo -e "\n${BOLD}Accepting Xcode license...${NC}"
-        sudo xcodebuild -license accept &>/dev/null
+    else
+        echo -e "\r${RED}✗${NC} Failed to install ${name}. You may need to install it manually from the Mac App Store.  "
     fi
-fi
+done
 
 # Add tap for fonts
 echo -e "\n${BOLD}Adding font support...${NC}"

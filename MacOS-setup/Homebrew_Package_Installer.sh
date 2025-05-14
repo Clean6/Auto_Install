@@ -155,57 +155,69 @@ done
 
 # Build Ghidra from source
 echo -e "\n${BOLD}Building Ghidra from source...${NC}"
+
+# Create a clean temporary directory
+GHIDRA_TMP_DIR=$(mktemp -d)
 echo -n "Cloning Ghidra repository..."
-git clone https://github.com/NationalSecurityAgency/ghidra.git /tmp/ghidra &>/dev/null &
+
+# Clone with progress in background
+git clone https://github.com/NationalSecurityAgency/ghidra.git "$GHIDRA_TMP_DIR" &>/dev/null &
 pid=$!
 spinner $pid
 wait $pid
 
 if [ $? -eq 0 ]; then
     echo -e "\r${GREEN}✓${NC} Successfully cloned Ghidra repository  "
-    echo -n "Building Ghidra..."
-    cd /tmp/ghidra
-    gradle --init-script gradle/support/fetchDependencies.gradle init &>/dev/null && \
-    gradle buildGhidra &>/dev/null &
-    pid=$!
-    spinner $pid
-    wait $pid
-    if [ $? -eq 0 ]; then
-        echo -e "\r${GREEN}✓${NC} Successfully built Ghidra  "
-        # Move built Ghidra to Applications
-        echo -n "Installing Ghidra..."
-        sudo mv build/dist/ghidra_* /Applications/Ghidra &>/dev/null &
-        pid=$!
-        spinner $pid
-        wait $pid
-        if [ $? -eq 0 ]; then
-            echo -e "\r${GREEN}✓${NC} Successfully installed Ghidra  "
+    echo -n "Building Ghidra (this may take a while)..."
+    
+    # Change to Ghidra directory
+    cd "$GHIDRA_TMP_DIR" || exit 1
+    
+    # First fetch dependencies (not in background to ensure completion)
+    if gradle --init-script gradle/support/fetchDependencies.gradle init &>/dev/null; then
+        # Then build Ghidra (not in background to ensure completion)
+        if gradle buildGhidra &>/dev/null; then
+            echo -e "\r${GREEN}✓${NC} Successfully built Ghidra  "
+            
+            echo -n "Installing Ghidra..."
+            # Create Applications directory if it doesn't exist
+            sudo mkdir -p /Applications
+            
+            # Move built Ghidra to Applications (not in background)
+            if sudo mv build/dist/ghidra_* /Applications/Ghidra &>/dev/null; then
+                echo -e "\r${GREEN}✓${NC} Successfully installed Ghidra  "
+            else
+                echo -e "\r${RED}✗${NC} Failed to install Ghidra  "
+            fi
         else
-            echo -e "\r${RED}✗${NC} Failed to install Ghidra  "
+            echo -e "\r${RED}✗${NC} Failed to build Ghidra. Try building manually with: cd $GHIDRA_TMP_DIR && gradle buildGhidra"
         fi
-        # Cleanup
-        cd - >/dev/null
-        rm -rf /tmp/ghidra
     else
-        echo -e "\r${RED}✗${NC} Failed to build Ghidra  "
-        cd - >/dev/null
-        rm -rf /tmp/ghidra
+        echo -e "\r${RED}✗${NC} Failed to initialize Ghidra build. Check if gradle is properly installed."
     fi
+    
+    # Return to original directory and cleanup
+    cd - >/dev/null
+    rm -rf "$GHIDRA_TMP_DIR"
 else
-    echo -e "\r${RED}✗${NC} Failed to clone Ghidra repository  "
+    echo -e "\r${RED}✗${NC} Failed to clone Ghidra repository. Check your internet connection."
 fi
 
 # Install Python setuptools
 echo -e "\n${BOLD}Installing Python setuptools...${NC}"
 echo -n "Installing setuptools..."
-pip3 install --upgrade setuptools &>/dev/null &
-pid=$!
-spinner $pid
-wait $pid
-if [ $? -eq 0 ]; then
-    echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
+
+# Use python3 -m pip to ensure we're using the right pip
+if command -v python3 >/dev/null 2>&1; then
+    # Run pip install without background process to ensure completion
+    if python3 -m pip install --upgrade setuptools &>/dev/null; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
+    else
+        echo -e "\r${RED}✗${NC} Failed to install setuptools. Try running: python3 -m pip install --upgrade setuptools"
+    fi
 else
-    echo -e "\r${RED}✗${NC} Failed to install setuptools  "
+    echo -e "\r${RED}✗${NC} Python3 not found. Please ensure Python3 is installed."
+fi
 fi
 
 # Install cask packages

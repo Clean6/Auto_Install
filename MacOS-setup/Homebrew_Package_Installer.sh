@@ -6,6 +6,25 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Installation flag file
+INSTALL_FLAG="$HOME/.macos_setup_complete"
+
+# Function to check if full installation was previously completed
+check_previous_installation() {
+    if [ -f "$INSTALL_FLAG" ]; then
+        echo -e "${GREEN}✓${NC} Previous installation detected."
+        read -p "Would you like to run the installation again? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installation skipped. Remove $INSTALL_FLAG to force installation."
+            exit 0
+        fi
+    fi
+}
+
+# Run installation check
+check_previous_installation
+
 # Check and install Homebrew
 install_homebrew() {
     echo -e "${BOLD}Checking for Homebrew installation...${NC}"
@@ -249,41 +268,6 @@ else
     echo -e "\r${RED}✗${NC} Failed to clone Ghidra repository. Check your internet connection."
 fi
 
-# Install Python tools
-echo -e "\n${BOLD}Installing Python tools...${NC}"
-
-# Check for Python3 installation and install if needed
-if ! command -v python3 >/dev/null 2>&1; then
-    echo -n "Installing Python3..."
-    brew install python3
-    if [ $? -eq 0 ]; then
-        echo -e "\r${GREEN}✓${NC} Successfully installed Python3  "
-    else
-        echo -e "\r${RED}✗${NC} Failed to install Python3"
-        exit 1
-    fi
-fi
-
-# Ensure pip is installed and up to date
-echo -n "Setting up pip..."
-curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py &>/dev/null
-if python3 /tmp/get-pip.py --user &>/dev/null; then
-    echo -e "\r${GREEN}✓${NC} Successfully set up pip  "
-    
-    # Then install setuptools
-    echo -n "Installing setuptools..."
-    if python3 -m pip install --user wheel setuptools &>/dev/null; then
-        echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
-    else
-        echo -e "\r${RED}✗${NC} Failed to install setuptools"
-    fi
-else
-    echo -e "\r${RED}✗${NC} Failed to set up pip"
-fi
-
-# Clean up
-rm -f /tmp/get-pip.py
-
 # Install cask packages
 echo -e "\n${BOLD}Installing cask packages...${NC}"
 for package in "${cask_packages[@]}"; do
@@ -300,6 +284,7 @@ mas_packages=(
     "462054704 Microsoft Word"
     "462062816 Microsoft PowerPoint"
     "985367838 Microsoft Outlook"
+    "905953485 NordVPN"
 )
 
 # Install each Mac App Store package
@@ -353,5 +338,9 @@ if [ $? -eq 0 ]; then
 else
     echo -e "\r${RED}✗${NC} Failed to clone BlackboardSync  "
 fi
+
+# Create installation flag file
+touch "$INSTALL_FLAG"
+echo "$(date)" > "$INSTALL_FLAG"
 
 echo -e "\n${GREEN}✨ Installation complete! ✨${NC}"

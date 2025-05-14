@@ -233,17 +233,25 @@ else
     echo -e "\r${RED}✗${NC} Failed to clone Ghidra repository. Check your internet connection."
 fi
 
-# Install Python setuptools
-echo -e "\n${BOLD}Installing Python setuptools...${NC}"
-echo -n "Installing setuptools..."
+# Install Python tools
+echo -e "\n${BOLD}Installing Python tools...${NC}"
 
-# Use python3 -m pip with user installation to avoid permission issues
+# Check for Python3 installation
 if command -v python3 >/dev/null 2>&1; then
-    # Run pip install without background process to ensure completion
-    if python3 -m pip install --user --upgrade setuptools &>/dev/null; then
-        echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
+    # First ensure pip is up to date
+    echo -n "Upgrading pip..."
+    if python3 -m pip install --upgrade pip &>/dev/null; then
+        echo -e "\r${GREEN}✓${NC} Successfully upgraded pip  "
+        
+        # Then install setuptools
+        echo -n "Installing setuptools..."
+        if python3 -m pip install --user --upgrade setuptools &>/dev/null; then
+            echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
+        else
+            echo -e "\r${RED}✗${NC} Failed to install setuptools. Try running: python3 -m pip install --user --upgrade setuptools"
+        fi
     else
-        echo -e "\r${RED}✗${NC} Failed to install setuptools. Try running: python3 -m pip install --user --upgrade setuptools"
+        echo -e "\r${RED}✗${NC} Failed to upgrade pip. Try running: python3 -m pip install --upgrade pip"
     fi
 else
     echo -e "\r${RED}✗${NC} Python3 not found. Please ensure Python3 is installed."

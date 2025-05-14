@@ -26,8 +26,8 @@ if git clone --depth 1 https://github.com/Clean6/Auto_Install.git "$TEMP_DIR" &>
     # Detect OS
     if [[ "$OSTYPE" == "darwin"* ]]; then
         echo -e "\n${BOLD}macOS detected, running macOS setup...${NC}"
-        chmod +x "$TEMP_DIR/MacOS-setup/Homebrew_Package_Installer.sh"
-        "$TEMP_DIR/MacOS-setup/Homebrew_Package_Installer.sh"
+        chmod +x "$TEMP_DIR/MacOS-setup/"*.sh
+        "$TEMP_DIR/MacOS-setup/macos_setup.sh"
     elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
         echo -e "\n${BOLD}Windows detected, please run the Windows setup manually:${NC}"
         echo "1. Open PowerShell as Administrator"

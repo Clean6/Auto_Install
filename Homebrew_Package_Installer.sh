@@ -55,7 +55,7 @@ brew_packages=(
     "git"
     "tmux"
     "htop"
-    "python@3.11"  # Specify Python version explicitly
+    "python3"
     # CLI Tools
     "trash"
     "tree"
@@ -92,6 +92,7 @@ cask_packages=(
     # Cloud & Internet
     "firefox"
     "discord"
+    "steam"
     # Productivity
     "mactex"
     # Audio/Video/Graphics

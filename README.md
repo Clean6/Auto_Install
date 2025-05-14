@@ -6,4 +6,4 @@ To run mac os:
 
 -- Run Script --
 
-	sudo ./Homebrew_Package_Installer.sh
+	./Homebrew_Package_Installer.sh

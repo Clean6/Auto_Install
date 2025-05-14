@@ -1,8 +1,9 @@
 To run mac os:
 
--- Run Script --
+-- Make file executable --
 
 	chmod +x Homebrew_Package_Installer.sh
+ -- Run Script --
  
 	./Homebrew_Package_Installer.sh
 

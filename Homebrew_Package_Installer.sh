@@ -33,6 +33,21 @@ install_homebrew() {
     fi
 }
 
+# Function to show a spinner while a process is running
+spinner() {
+    local pid=$1
+    while kill -0 $pid 2>/dev/null; do
+        for i in "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏"; do
+            echo -en "\r$i"
+            sleep 0.1
+            if ! kill -0 $pid 2>/dev/null; then
+                break
+            fi
+        done
+    done
+    echo -en "\r"
+}
+
 # Arrays of packages to install
 brew_packages=(
     # Essential
@@ -40,7 +55,7 @@ brew_packages=(
     "git"
     "tmux"
     "htop"
-    "python3"
+    "python@3.11"  # Specify Python version explicitly
     # CLI Tools
     "trash"
     "tree"
@@ -53,7 +68,7 @@ brew_packages=(
     "ninja"
     "cocoapods"
     "openjdk"
-    "rustup-init"
+    "rustup"      # Changed from rustup-init
     "gh"
     "winetricks"
     # Audio/Video
@@ -103,11 +118,23 @@ install_package() {
         cmd="brew install"
     fi
 
-    echo "Installing ${package}..."
-    if $cmd "$package" &>/dev/null; then
-        echo -e "${GREEN}✓${NC} Successfully installed ${package}"
+    echo -n "Installing ${package}..."
+    $cmd "$package" &>/dev/null &
+    local pid=$!
+    while kill -0 $pid 2>/dev/null; do
+        for i in "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏"; do
+            echo -en "\r$i Installing ${package}..."
+            sleep 0.1
+            if ! kill -0 $pid 2>/dev/null; then
+                break
+            fi
+        done
+    done
+    wait $pid
+    if [ $? -eq 0 ]; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed ${package}  "
     else
-        echo -e "${RED}✗${NC} Failed to install ${package}"
+        echo -e "\r${RED}✗${NC} Failed to install ${package}  "
     fi
 }
 

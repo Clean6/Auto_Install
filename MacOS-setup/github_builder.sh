@@ -33,9 +33,19 @@ install_ghidra() {
 
     # Set up Java environment
     echo -n "Setting up Java environment..."
-    sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+    if ! sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk; then
+        echo -e "\r${RED}✗${NC} Failed to set up Java symlink"
+        return 1
+    fi
+    
     export JAVA_HOME=$(brew --prefix)/opt/openjdk/libexec/openjdk.jdk/Contents/Home
     export PATH="$JAVA_HOME/bin:$PATH"
+
+    # Verify Java setup
+    if ! java -version &>/dev/null; then
+        echo -e "\r${RED}✗${NC} Java setup failed"
+        return 1
+    fi
     echo -e "\r${GREEN}✓${NC} Java environment set up successfully"
 
     # Create a clean temporary directory

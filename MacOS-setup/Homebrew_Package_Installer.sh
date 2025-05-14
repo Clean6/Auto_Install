@@ -217,16 +217,18 @@ done
 # Install Mac App Store applications
 echo -e "\n${BOLD}Installing Mac App Store applications...${NC}"
 
-# Check and wait for Mac App Store sign in
-while ! mas account >/dev/null; do
+# Check Mac App Store sign in status
+if ! mas account >/dev/null; then
     echo -e "${RED}⚠️  You are not signed into the Mac App Store${NC}"
     echo -e "Please sign in to the Mac App Store application and press ENTER to continue..."
     read -r
-    echo -e "Checking sign in status..."
-    sleep 2  # Give some time for the sign in to register
-done
+    if ! mas account >/dev/null; then
+        echo -e "${RED}✗${NC} Still not signed into Mac App Store. Skipping Mac App Store installations."
+        exit 1
+    fi
+fi
 
-echo -e "${GREEN}✓${NC} Successfully signed into Mac App Store"
+echo -e "${GREEN}✓${NC} Mac App Store sign in verified"
 
 # Array of Mac App Store apps with their IDs
 mas_packages=(

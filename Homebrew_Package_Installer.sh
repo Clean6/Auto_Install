@@ -163,4 +163,32 @@ done
 echo -e "\n${BOLD}Adding font support...${NC}"
 brew tap homebrew/cask-fonts &>/dev/null
 
+# Install BlackboardSync
+echo -e "\n${BOLD}Installing BlackboardSync...${NC}"
+echo -n "Cloning BlackboardSync repository..."
+git clone https://github.com/sanjacob/BlackboardSync /tmp/BlackboardSync &>/dev/null &
+pid=$!
+spinner $pid
+wait $pid
+
+if [ $? -eq 0 ]; then
+    echo -e "\r${GREEN}✓${NC} Successfully cloned BlackboardSync  "
+    echo -n "Installing BlackboardSync..."
+    cd /tmp/BlackboardSync
+    pip3 install . &>/dev/null &
+    pid=$!
+    spinner $pid
+    wait $pid
+    if [ $? -eq 0 ]; then
+        echo -e "\r${GREEN}✓${NC} Successfully installed BlackboardSync  "
+        # Cleanup
+        cd - >/dev/null
+        rm -rf /tmp/BlackboardSync
+    else
+        echo -e "\r${RED}✗${NC} Failed to install BlackboardSync  "
+    fi
+else
+    echo -e "\r${RED}✗${NC} Failed to clone BlackboardSync  "
+fi
+
 echo -e "\n${GREEN}✨ Installation complete! ✨${NC}"

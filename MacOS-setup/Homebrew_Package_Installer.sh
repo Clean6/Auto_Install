@@ -55,7 +55,7 @@ brew_packages=(
     "git"
     "tmux"
     "htop"
-    "python3"  # Specify Python version explicitly
+    "python3"
     "mas"  # Mac App Store CLI
     # CLI Tools
     "trash"
@@ -71,10 +71,10 @@ brew_packages=(
     "openjdk"
     "rustup"      # Changed from rustup-init
     "gh"
-    "winetricks"
+    "gradle"      # Required for building Ghidra
+    "unzip"       # Required for Ghidra build process
     # Audio/Video
     "ffmpeg"
-    "pdfpc"
 )
 
 cask_packages=(
@@ -83,9 +83,7 @@ cask_packages=(
     "cmake"
     "processing"
     "dotnet-sdk"
-    "ghidra"
     # Utilities
-    "bettertouchtool"
     "appcleaner"
     "the-unarchiver"
     "coconutbattery"
@@ -93,6 +91,7 @@ cask_packages=(
     # Cloud & Internet
     "firefox"
     "discord"
+    "steam"
     # Productivity
     "mactex"
     # Audio/Video/Graphics
@@ -153,6 +152,61 @@ echo -e "\n${BOLD}Installing brew packages...${NC}"
 for package in "${brew_packages[@]}"; do
     install_package "$package" "false"
 done
+
+# Build Ghidra from source
+echo -e "\n${BOLD}Building Ghidra from source...${NC}"
+echo -n "Cloning Ghidra repository..."
+git clone https://github.com/NationalSecurityAgency/ghidra.git /tmp/ghidra &>/dev/null &
+pid=$!
+spinner $pid
+wait $pid
+
+if [ $? -eq 0 ]; then
+    echo -e "\r${GREEN}✓${NC} Successfully cloned Ghidra repository  "
+    echo -n "Building Ghidra..."
+    cd /tmp/ghidra
+    gradle --init-script gradle/support/fetchDependencies.gradle init &>/dev/null && \
+    gradle buildGhidra &>/dev/null &
+    pid=$!
+    spinner $pid
+    wait $pid
+    if [ $? -eq 0 ]; then
+        echo -e "\r${GREEN}✓${NC} Successfully built Ghidra  "
+        # Move built Ghidra to Applications
+        echo -n "Installing Ghidra..."
+        sudo mv build/dist/ghidra_* /Applications/Ghidra &>/dev/null &
+        pid=$!
+        spinner $pid
+        wait $pid
+        if [ $? -eq 0 ]; then
+            echo -e "\r${GREEN}✓${NC} Successfully installed Ghidra  "
+        else
+            echo -e "\r${RED}✗${NC} Failed to install Ghidra  "
+        fi
+        # Cleanup
+        cd - >/dev/null
+        rm -rf /tmp/ghidra
+    else
+        echo -e "\r${RED}✗${NC} Failed to build Ghidra  "
+        cd - >/dev/null
+        rm -rf /tmp/ghidra
+    fi
+else
+    echo -e "\r${RED}✗${NC} Failed to clone Ghidra repository  "
+fi
+
+# Install Python setuptools
+echo -e "\n${BOLD}Installing Python setuptools...${NC}"
+echo -n "Installing setuptools..."
+pip3 install --upgrade setuptools &>/dev/null &
+pid=$!
+spinner $pid
+wait $pid
+if [ $? -eq 0 ]; then
+    echo -e "\r${GREEN}✓${NC} Successfully installed setuptools  "
+else
+    echo -e "\r${RED}✗${NC} Failed to install setuptools  "
+fi
 
 # Install cask packages
 echo -e "\n${BOLD}Installing cask packages...${NC}"

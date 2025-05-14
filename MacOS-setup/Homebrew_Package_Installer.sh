@@ -53,10 +53,13 @@ brew_packages=(
     # Essential
     "neovim"
     "git"
+    "git-lfs"     # Git Large File Storage
     "tmux"
     "htop"
     "python3"
-    "mas"  # Mac App Store CLI
+    "node"        # Node.js runtime
+    "mas"         # Mac App Store CLI
+    "wget"        # File downloader
     # CLI Tools
     "trash"
     "tree"
@@ -64,6 +67,8 @@ brew_packages=(
     "fzf"
     "jq"
     "rlwrap"
+    "nmap"        # Network exploration tool
+    "speedtest-cli"  # Internet speed test
     # Development
     "coreutils"
     "ninja"
@@ -73,6 +78,11 @@ brew_packages=(
     "gh"
     "gradle"      # Required for building Ghidra
     "unzip"       # Required for Ghidra build process
+    "yarn"        # Node.js package manager
+    "autoconf"    # Automatic configure script builder
+    # Document Processing
+    "pandoc"      # Universal document converter
+    "ghostscript" # PostScript and PDF interpreter
     # Audio/Video
     "ffmpeg"
 )

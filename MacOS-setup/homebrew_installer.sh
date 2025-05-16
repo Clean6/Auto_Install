@@ -68,6 +68,10 @@ install_homebrew() {
     else
         echo -e "${GREEN}✓${NC} Homebrew is already installed"
     fi
+
+    # Add custom taps
+    echo -e "\n${BOLD}Adding custom taps...${NC}"
+    brew tap Clean6/casks https://github.com/Clean6/homebrew-casks &>/dev/null || true
 }
 
 # Arrays of packages to install
@@ -103,7 +107,7 @@ brew_packages=(
     "unzip"       # Required for Ghidra build process
     "yarn"        # Node.js package manager
     "autoconf"    # Automatic configure script builder
-    "pipenv"    # Python virtual environment managerq
+    "pipenv"    # Python virtual environment manager
     "pipx"      # Python package manager
     # Document Processing
     "pandoc"      # Universal document converter
@@ -115,7 +119,7 @@ brew_packages=(
 cask_packages=(
     # Development
     "visual-studio-code"
-    "blackboardsync"
+    "blackboardsync"  # Blackboard content sync utility
     "cmake"
     "processing"
     "dotnet-sdk"
@@ -192,7 +196,7 @@ main() {
 
     # Add custom taps
     echo -e "\n${BOLD}Adding custom taps...${NC}"
-    brew tap Clean6/casks https://github.com/Clean6/homebrew-casks &>/dev/null
+    brew tap Clean6/casks https://github.com/Clean6/homebrew-casks &>/dev/null || true
 
     # Install brew packages
     echo -e "\n${BOLD}Installing brew packages...${NC}"

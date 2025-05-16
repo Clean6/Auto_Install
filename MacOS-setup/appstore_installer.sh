@@ -27,7 +27,7 @@ install_mas_apps() {
     if ! command -v mas &>/dev/null; then
         echo -e "${RED}Error: mas CLI is not installed. Please install it via Homebrew first.${NC}"
         return 1
-    }
+    fi
 
     # Install each Mac App Store package
     for package in "${mas_packages[@]}"; do

@@ -9,7 +9,7 @@ mkdir -p "$LOGS_DIR"
 
 # Function to log a successful installation
 log_success() {
-    local package_type=$1  # brew, cask, mas, github
+    local package_type=$1  # brew, cask, mas
     local package_name=$2
     local log_file="$LOGS_DIR/${package_type}_installed.log"
     echo "$(date '+%Y-%m-%d %H:%M:%S') $package_name" >> "$log_file"
@@ -17,7 +17,7 @@ log_success() {
 
 # Function to check if a package was previously installed
 check_previous_install() {
-    local package_type=$1  # brew, cask, mas, github
+    local package_type=$1  # brew, cask, mas
     local package_name=$2
     local log_file="$LOGS_DIR/${package_type}_installed.log"
     

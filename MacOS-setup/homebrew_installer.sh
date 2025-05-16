@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# This script installs Homebrew and a set of packages for macOS.
+# It includes essential tools, development libraries, and applications.
+
+# Check if the script is run as root
+if [[ "$EUID" -eq 0 ]]; then
+    echo "Please do not run this script as root."
+    exit 1
+fi
+
+# Set the script to exit immediately on error
+set -e
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LOGS_DIR="$SCRIPT_DIR/installer_logs"
+
+# Create logs directory if it doesn't exist
+mkdir -p "$LOGS_DIR"
+
 # Source logging utilities
 source "$(dirname "${BASH_SOURCE[0]}")/logging_utils.sh"
 
@@ -60,6 +79,7 @@ brew_packages=(
     "tmux"
     "htop"
     "python3"
+    "python@3.10" # Version 3.10 for compatibility
     "node"        # Node.js runtime
     "mas"         # Mac App Store CLI
     "wget"        # File downloader
@@ -72,6 +92,7 @@ brew_packages=(
     "rlwrap"
     "nmap"        # Network exploration tool
     "speedtest-cli"  # Internet speed test
+    "zsh"        # Z shell
     # Development
     "coreutils"
     "ninja"
@@ -83,6 +104,8 @@ brew_packages=(
     "unzip"       # Required for Ghidra build process
     "yarn"        # Node.js package manager
     "autoconf"    # Automatic configure script builder
+    "pipenv"    # Python virtual environment managerq
+    "pipx"      # Python package manager
     # Document Processing
     "pandoc"      # Universal document converter
     "ghostscript" # PostScript and PDF interpreter

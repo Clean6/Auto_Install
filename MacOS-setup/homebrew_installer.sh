@@ -120,6 +120,7 @@ cask_packages=(
     # Development
     "visual-studio-code"
     "blackboardsync"  # Blackboard content sync utility (from Clean6/casks tap)
+    "geoport"       # Serial port terminal for geotechnical instruments (from Clean6/casks tap)
     "cmake"
     "processing"
     "dotnet-sdk"

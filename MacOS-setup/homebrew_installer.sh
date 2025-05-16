@@ -108,7 +108,7 @@ brew_packages=(
     "yarn"        # Node.js package manager
     "autoconf"    # Automatic configure script builder
     "pipenv"    # Python virtual environment manager
-    "pipx"      # Python package manager
+    "pipx"      # Python package manager for managing isolated Python tools
     # Document Processing
     "pandoc"      # Universal document converter
     "ghostscript" # PostScript and PDF interpreter
@@ -119,7 +119,7 @@ brew_packages=(
 cask_packages=(
     # Development
     "visual-studio-code"
-    "blackboardsync"  # Blackboard content sync utility
+    "blackboardsync"  # Blackboard content sync utility (from Clean6/casks tap)
     "cmake"
     "processing"
     "dotnet-sdk"

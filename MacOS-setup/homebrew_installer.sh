@@ -91,7 +91,6 @@ brew_packages=(
     "jq"
     "rlwrap"
     "nmap"        # Network exploration tool
-    "speedtest-cli"  # Internet speed test
     "zsh"        # Z shell
     # Development
     "coreutils"
@@ -116,6 +115,7 @@ brew_packages=(
 cask_packages=(
     # Development
     "visual-studio-code"
+    "blackboardsync"
     "cmake"
     "processing"
     "dotnet-sdk"
@@ -124,6 +124,8 @@ cask_packages=(
     "the-unarchiver"
     "coconutbattery"
     "raspberry-pi-imager"
+    "temurin" # Ghidra dependency
+    "ghidra"
     # Cloud & Internet
     "firefox"
     "discord"
@@ -187,6 +189,10 @@ main() {
     brew update &>/dev/null
     brew upgrade &>/dev/null
     brew cleanup &>/dev/null
+
+    # Add custom taps
+    echo -e "\n${BOLD}Adding custom taps...${NC}"
+    brew tap Clean6/casks https://github.com/Clean6/homebrew-casks &>/dev/null
 
     # Install brew packages
     echo -e "\n${BOLD}Installing brew packages...${NC}"

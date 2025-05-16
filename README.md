@@ -9,7 +9,6 @@ This repository contains setup automation scripts for both macOS and Windows env
   - Development tools (Python, Git, Node.js, etc.)
   - Common applications via Homebrew Cask
   - Mac App Store applications via `mas`
-  - Custom builds (Ghidra from source)
   - Python package installation
 
 - **Windows Setup**:
@@ -30,12 +29,12 @@ This repository contains setup automation scripts for both macOS and Windows env
 
 2. Make the script executable:
    ```bash
-   chmod +x Homebrew_Package_Installer.sh
+   chmod +x macos_setup.sh
    ```
 
 3. Run the script:
    ```bash
-   ./Homebrew_Package_Installer.sh
+   ./macos_setup.sh
    ```
 
 ### Windows Setup

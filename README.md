@@ -72,9 +72,8 @@ You can run the full setup on a fresh Mac with a single command (no need to clon
 ## Customization
 
 ### macOS
-- Edit `MacOS-setup/homebrew_installer.sh` to modify:
-  - Homebrew packages (`brew_packages` array)
-  - Cask applications (`cask_packages` array)
+- Edit `MacOS-setup/brew_formulae.txt` to modify the list of Homebrew formulae (one per line)
+- Edit `MacOS-setup/brew_casks.txt` to modify the list of Homebrew casks (one per line)
 - Edit `MacOS-setup/appstore_installer.sh` to modify:
   - Mac App Store applications (`mas_packages` array)
 - **Logs**: Check `MacOS-setup/installer_logs/` for logs of installed packages.

@@ -1,5 +1,4 @@
 appcleaner
-blackboardsync
 cmake
 coconutbattery
 discord
@@ -7,9 +6,7 @@ dotnet-sdk
 firefox
 ghidra
 gimp
-mactex
 obsidian
-powershell
 processing
 raspberry-pi-imager
 spotify

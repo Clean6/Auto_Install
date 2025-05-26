@@ -11,7 +11,10 @@ This repository contains setup automation scripts for both macOS and Windows env
   - Common applications via Homebrew Cask
   - Mac App Store applications via `mas`
   - Python package installation
-  - **Logging**: All installed packages are logged in `MacOS-setup/installer_logs/`
+  - **Logging**: All installed packages are logged in `MacOS-setup/logs/` as follows:
+    - Homebrew formulae: `logs/brew_installed.log`
+    - Homebrew casks: `logs/cask_installed.log`
+    - Mac App Store apps: `logs/mas_installed.log`
   - **Summary**: A summary of the installation is saved to `~/.macos_setup_complete`
 
 - **Windows Setup**:
@@ -76,7 +79,7 @@ You can run the full setup on a fresh Mac with a single command (no need to clon
 - Edit `MacOS-setup/brew_casks.txt` to modify the list of Homebrew casks (one per line)
 - Edit `MacOS-setup/appstore_installer.sh` to modify:
   - Mac App Store applications (`mas_packages` array)
-- **Logs**: Check `MacOS-setup/installer_logs/` for logs of installed packages.
+- **Logs**: Check `MacOS-setup/logs/` for logs of installed packages.
 - **Summary**: See `~/.macos_setup_complete` for a summary of the last installation.
 
 ### Windows

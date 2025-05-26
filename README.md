@@ -22,7 +22,25 @@ This repository contains setup automation scripts for both macOS and Windows env
 
 ## Quick Start
 
-### macOS Setup
+### macOS Setup (Recommended One-Liner)
+
+You can run the full setup on a fresh Mac with a single command (no need to clone the repo first):
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Clean6/Auto_Install/main/install.sh)"
+```
+
+- This will download the latest version, run the full setup, and clean up after itself.
+
+#### To run a specific script from the repo (advanced):
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Clean6/Auto_Install/main/install.sh)" MacOS-setup/homebrew_installer.sh
+```
+
+- Replace `MacOS-setup/homebrew_installer.sh` with any script path in the repo you want to run.
+
+### macOS Setup (Manual)
 
 1. Clone the repository:
    ```bash

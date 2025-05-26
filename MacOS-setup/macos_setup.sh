@@ -42,7 +42,9 @@ brew tap homebrew/cask-fonts &>/dev/null
     echo -e "\nInstalled Packages Summary:"
     for type in brew cask mas; do
         if [[ -f "$LOGS_DIR/${type}_installed.log" ]]; then
-            echo -e "\n${type^} packages:"
+            # Use awk to capitalize first letter for POSIX compatibility
+            type_capitalized=$(echo "$type" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+            echo -e "\n${type_capitalized} packages:"
             cat "$LOGS_DIR/${type}_installed.log"
         fi
     done

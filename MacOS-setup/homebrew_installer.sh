@@ -251,6 +251,7 @@ cask_packages=(
     "the-unarchiver"
     "visual-studio-code"
     "vlc"
+    "utm"
 )
 
 # Function to install a package
@@ -268,15 +269,33 @@ install_package() {
 
     if [[ "$is_cask" == "true" ]]; then
         if brew list --cask "$package" &>/dev/null; then
-            echo -e "${GREEN}✓${NC} ${package} is already installed"
-            log_success "$package_type" "$package"
+            # Check if cask is outdated
+            if brew outdated --cask "$package" &>/dev/null; then
+                echo -n "Upgrading ${package}..."
+                brew upgrade --cask "$package" &>/dev/null && \
+                    echo -e "\r${GREEN}✓${NC} Upgraded ${package}  " || \
+                    echo -e "\r${RED}✗${NC} Failed to upgrade ${package}  "
+                log_success "$package_type" "$package"
+            else
+                echo -e "${GREEN}✓${NC} ${package} is already up to date"
+                log_success "$package_type" "$package"
+            fi
             return 0
         fi
         cmd="brew install --cask"
     else
         if brew list "$package" &>/dev/null; then
-            echo -e "${GREEN}✓${NC} ${package} is already installed"
-            log_success "$package_type" "$package"
+            # Check if formula is outdated
+            if brew outdated "$package" &>/dev/null; then
+                echo -n "Upgrading ${package}..."
+                brew upgrade "$package" &>/dev/null && \
+                    echo -e "\r${GREEN}✓${NC} Upgraded ${package}  " || \
+                    echo -e "\r${RED}✗${NC} Failed to upgrade ${package}  "
+                log_success "$package_type" "$package"
+            else
+                echo -e "${GREEN}✓${NC} ${package} is already up to date"
+                log_success "$package_type" "$package"
+            fi
             return 0
         fi
         cmd="brew install"

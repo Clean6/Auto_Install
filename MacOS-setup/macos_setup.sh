@@ -26,12 +26,22 @@ echo "Starting installation at $(date)" | tee -a "$ERROR_LOG"
 brew update && brew upgrade
 
 # Fix tap issues and add fresh tap
-brew untap clean6/homebrew-casks clean6/clean6 2>/dev/null || true
+for tap in clean6/homebrew-casks clean6/clean6; do
+    brew untap "$tap" 2>/dev/null || true
+done
+
+# Clean up and repair Homebrew
+brew cleanup
+brew doctor || true
 brew tap --repair
+
+# Add our custom tap
 if ! brew tap clean6/homebrew-casks https://github.com/Clean6/homebrew-casks.git; then
     echo "Failed to tap clean6/homebrew-casks" | tee -a "$ERROR_LOG"
     exit 1
 fi
+
+# Update Homebrew again after adding tap
 brew update
 
 # Helper functions
@@ -80,18 +90,29 @@ print_summary() {
 }
 
 # Install Formulae
+echo "Checking for brew-formulae.txt in ${SCRIPT_DIR}..." | tee -a "$ERROR_LOG"
 if [ -f "${SCRIPT_DIR}/brew-formulae.txt" ]; then
     echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
     echo "Installing Homebrew formulae..." | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
     echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
-    while IFS= read -r formula || [ -n "$formula" ]; do
+    
+    # Remove comments from formulae list
+    grep -v '^//' "${SCRIPT_DIR}/brew-formulae.txt" | while IFS= read -r formula || [ -n "$formula" ]; do
         [ -z "$formula" ] && continue
+        [ "${formula:0:1}" = "#" ] && continue
+        
         echo "Installing formula: $formula..." | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
+        if brew ls --versions "$formula" > /dev/null; then
+            echo "Formula already installed: $formula" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
+            verify_install "formula" "$formula" "$ERROR_LOG"
+            continue
+        fi
+        
         if ! brew install "$formula" 2>> "$ERROR_LOG"; then
             echo "Failed to install formula: $formula" | tee -a "$ERROR_LOG"
         fi 2>&1 | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
         verify_install "formula" "$formula" "$ERROR_LOG"
-    done < "${SCRIPT_DIR}/brew-formulae.txt"
+    done
     echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
 fi
 
@@ -100,14 +121,24 @@ if [ -f "${SCRIPT_DIR}/brew-casks.txt" ]; then
     echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
     echo "Installing Homebrew casks..." | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
     echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
-    while IFS= read -r cask || [ -n "$cask" ]; do
+    
+    # Remove comments from casks list
+    grep -v '^//' "${SCRIPT_DIR}/brew-casks.txt" | while IFS= read -r cask || [ -n "$cask" ]; do
         [ -z "$cask" ] && continue
+        [ "${cask:0:1}" = "#" ] && continue
+        
         echo "Installing cask: $cask..." | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
+        if brew list --cask "$cask" &>/dev/null; then
+            echo "Cask already installed: $cask" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
+            verify_install "cask" "$cask" "$ERROR_LOG"
+            continue
+        fi
+        
         if ! brew install --cask "$cask" 2>> "$ERROR_LOG"; then
             echo "Failed to install cask: $cask" | tee -a "$ERROR_LOG"
         fi 2>&1 | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
         verify_install "cask" "$cask" "$ERROR_LOG"
-    done < "${SCRIPT_DIR}/brew-casks.txt"
+    done
     echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
 fi
 

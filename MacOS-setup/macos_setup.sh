@@ -81,26 +81,34 @@ print_summary() {
 
 # Install Formulae
 if [ -f "${SCRIPT_DIR}/brew-formulae.txt" ]; then
+    echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
     echo "Installing Homebrew formulae..." | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
+    echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
     while IFS= read -r formula || [ -n "$formula" ]; do
         [ -z "$formula" ] && continue
+        echo "Installing formula: $formula..." | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
         if ! brew install "$formula" 2>> "$ERROR_LOG"; then
             echo "Failed to install formula: $formula" | tee -a "$ERROR_LOG"
         fi 2>&1 | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
         verify_install "formula" "$formula" "$ERROR_LOG"
     done < "${SCRIPT_DIR}/brew-formulae.txt"
+    echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/brew_installed.log"
 fi
 
 # Install Casks
 if [ -f "${SCRIPT_DIR}/brew-casks.txt" ]; then
+    echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
     echo "Installing Homebrew casks..." | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
+    echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
     while IFS= read -r cask || [ -n "$cask" ]; do
         [ -z "$cask" ] && continue
+        echo "Installing cask: $cask..." | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
         if ! brew install --cask "$cask" 2>> "$ERROR_LOG"; then
             echo "Failed to install cask: $cask" | tee -a "$ERROR_LOG"
         fi 2>&1 | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
         verify_install "cask" "$cask" "$ERROR_LOG"
     done < "${SCRIPT_DIR}/brew-casks.txt"
+    echo "===============================================" | tee -a "${SCRIPT_DIR}/logs/cask_installed.log"
 fi
 
 # Install Applications via mas-cli

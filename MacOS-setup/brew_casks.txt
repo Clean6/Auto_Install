@@ -19,3 +19,4 @@ visual-studio-code
 vlc
 utm
 blackboard-sync
+geoport

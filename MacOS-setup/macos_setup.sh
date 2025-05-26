@@ -25,12 +25,14 @@ echo "Starting installation at $(date)" | tee -a "$ERROR_LOG"
 
 brew update && brew upgrade
 
-# Remove existing tap if present and add fresh
-brew untap clean6/homebrew-casks 2>/dev/null || true
+# Fix tap issues and add fresh tap
+brew untap clean6/homebrew-casks clean6/clean6 2>/dev/null || true
+brew tap --repair
 if ! brew tap clean6/homebrew-casks https://github.com/Clean6/homebrew-casks.git; then
     echo "Failed to tap clean6/homebrew-casks" | tee -a "$ERROR_LOG"
     exit 1
 fi
+brew update
 
 # Helper functions
 verify_install() {

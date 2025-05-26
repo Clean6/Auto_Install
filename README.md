@@ -6,10 +6,13 @@ This repository contains setup automation scripts for both macOS and Windows env
 
 - **macOS Setup**:
   - Automated Homebrew installation and package management
+  - Checks for and upgrades outdated packages, skipping those already up to date
   - Development tools (Python, Git, Node.js, etc.)
   - Common applications via Homebrew Cask
   - Mac App Store applications via `mas`
   - Python package installation
+  - **Logging**: All installed packages are logged in `MacOS-setup/installer_logs/`
+  - **Summary**: A summary of the installation is saved to `~/.macos_setup_complete`
 
 - **Windows Setup**:
   - PowerShell-based automation
@@ -51,10 +54,13 @@ This repository contains setup automation scripts for both macOS and Windows env
 ## Customization
 
 ### macOS
-- Edit `MacOS-setup/Homebrew_Package_Installer.sh` to modify:
+- Edit `MacOS-setup/homebrew_installer.sh` to modify:
   - Homebrew packages (`brew_packages` array)
   - Cask applications (`cask_packages` array)
+- Edit `MacOS-setup/appstore_installer.sh` to modify:
   - Mac App Store applications (`mas_packages` array)
+- **Logs**: Check `MacOS-setup/installer_logs/` for logs of installed packages.
+- **Summary**: See `~/.macos_setup_complete` for a summary of the last installation.
 
 ### Windows
 - Edit `windows-setup/src/config/packages.json` to modify the Windows package list

@@ -4,6 +4,7 @@ coconutbattery
 discord
 dotnet-sdk
 firefox
+geoport
 ghidra
 gimp
 obsidian

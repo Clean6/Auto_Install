@@ -7,6 +7,9 @@ fi
 
 brew update && brew upgrade
 
+# Add custom tap for GeoPort
+brew tap Clean6/homebrew-casks "$(pwd)"
+
 # Install Formulae
 brew install $(cat brew-formulae.txt) | tee logs/brew_installed.log
 

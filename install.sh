@@ -25,9 +25,22 @@ if git clone --depth 1 https://github.com/Clean6/Auto_Install.git "$TEMP_DIR" &>
     
     # Detect OS
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        echo -e "\n${BOLD}macOS detected, running macOS setup...${NC}"
+        echo -e "\n${BOLD}macOS detected...${NC}"
         chmod +x "$TEMP_DIR/MacOS-setup/"*.sh
-        "$TEMP_DIR/MacOS-setup/macos_setup.sh"
+        # If a script argument is provided, run that script, else run macos_setup.sh
+        if [[ -n "$1" ]]; then
+            SCRIPT_PATH="$TEMP_DIR/$1"
+            if [[ -f "$SCRIPT_PATH" ]]; then
+                echo -e "${BOLD}Running $1...${NC}"
+                bash "$SCRIPT_PATH"
+            else
+                echo -e "${RED}Script $1 not found in repo!${NC}"
+                rm -rf "$TEMP_DIR"
+                exit 1
+            fi
+        else
+            "$TEMP_DIR/MacOS-setup/macos_setup.sh"
+        fi
     elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
         echo -e "\n${BOLD}Windows detected, please run the Windows setup manually:${NC}"
         echo "1. Open PowerShell as Administrator"

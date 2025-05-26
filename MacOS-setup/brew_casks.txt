@@ -18,3 +18,5 @@ the-unarchiver
 visual-studio-code
 vlc
 utm
+geoport
+blackboard-sync

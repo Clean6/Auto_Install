@@ -7,6 +7,9 @@ fi
 
 brew update && brew upgrade
 
+# Add custom tap for additional casks
+brew tap clean6/homebrew-casks
+
 # Install Formulae
 brew install $(cat brew-formulae.txt) | tee logs/brew_installed.log
 

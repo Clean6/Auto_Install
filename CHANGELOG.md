@@ -4,12 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.4] - 2025-05-27
+### Changed
+- Modified GeoPort cask to build from source instead of using pre-built DMG
+- Added build dependencies (cmake, qt, boost) to GeoPort cask
+- Updated macos_setup.sh to build GeoPort directly from source file
+
 ## [1.3.3] - 2025-05-27
 ### Added
 - Added logging for all package installations in MacOS-setup
 - Created separate log files for Homebrew formulae, casks, and Mac App Store installations
+- Added GeoPort cask to default installation list
 ### Changed
 - Updated README to reflect new logging functionality
+- Modified macos_setup.sh to tap local custom casks repository
 
 ## [1.3.2] - 2025-05-17
 ### Added
